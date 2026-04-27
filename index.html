@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Group 4 – A/B Experiment</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f5f2ee;
+    --surface: #ffffff;
+    --text: #1a1a1a;
+    --muted: #6b6b6b;
+    --border: #e0dbd4;
+    --blue: #1a56db;
+    --green: #1a7a45;
+    --radius: 10px;
+    --shadow: 0 4px 24px rgba(0,0,0,0.08);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+  }
+
+  /* ── SCREENS ── */
+  .screen { display: none; }
+  .screen.active { display: flex; flex-direction: column; align-items: center; }
+
+  /* ── CARD ── */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 48px 40px;
+    max-width: 620px;
+    width: 100%;
+    animation: fadeUp 0.4s ease both;
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ── TYPOGRAPHY ── */
+  h1 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 2rem;
+    line-height: 1.2;
+    margin-bottom: 12px;
+  }
+  h2 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.5rem;
+    margin-bottom: 16px;
+  }
+  p {
+    color: var(--muted);
+    font-size: 0.97rem;
+    line-height: 1.65;
+    margin-bottom: 16px;
+  }
+  p:last-of-type { margin-bottom: 0; }
+
+  /* ── CONSENT SCREEN ── */
+  .consent-meta {
+    font-size: 0.8rem;
+    color: var(--muted);
+    border-top: 1px solid var(--border);
+    padding-top: 16px;
+    margin-top: 24px;
+    line-height: 1.6;
+  }
+
+  /* ── BUTTONS ── */
+  .btn-start {
+    display: inline-block;
+    margin-top: 28px;
+    padding: 14px 36px;
+    background: var(--text);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.95rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: opacity 0.15s;
+  }
+  .btn-start:hover { opacity: 0.82; }
+
+  /* ── TASK SCREEN ── */
+  .task-header {
+    font-size: 0.78rem;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 32px;
+  }
+
+  .fake-page {
+    background: #fafaf8;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 32px;
+    margin-bottom: 32px;
+    width: 100%;
+  }
+
+  .fake-page-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 24px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--border);
+  }
+  .fake-logo {
+    width: 28px; height: 28px;
+    background: var(--text);
+    border-radius: 6px;
+  }
+  .fake-brand {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1rem;
+  }
+  .fake-nav {
+    margin-left: auto;
+    display: flex;
+    gap: 20px;
+  }
+  .fake-nav span {
+    font-size: 0.82rem;
+    color: var(--muted);
+  }
+
+  .fake-hero-label {
+    font-size: 0.72rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 10px;
+  }
+  .fake-hero-title {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.6rem;
+    line-height: 1.25;
+    margin-bottom: 10px;
+  }
+  .fake-hero-body {
+    font-size: 0.88rem;
+    color: var(--muted);
+    line-height: 1.6;
+    margin-bottom: 24px;
+  }
+
+  /* THE CTA BUTTON — color set by JS */
+  #cta-btn {
+    padding: 14px 32px;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: filter 0.15s, transform 0.1s;
+    display: inline-block;
+  }
+  #cta-btn:hover  { filter: brightness(1.1); }
+  #cta-btn:active { transform: scale(0.97); }
+
+  /* ── LIKERT ── */
+  .likert-label {
+    font-size: 0.78rem;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 8px;
+  }
+  .likert-question {
+    font-size: 1.05rem;
+    color: var(--text);
+    margin-bottom: 20px;
+    line-height: 1.5;
+  }
+  .likert-scale {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 12px;
+  }
+  .likert-scale input[type="radio"] { display: none; }
+  .likert-scale label {
+    flex: 1;
+    min-width: 36px;
+    text-align: center;
+    padding: 10px 4px;
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.15s;
+    color: var(--muted);
+  }
+  .likert-scale input[type="radio"]:checked + label {
+    border-color: var(--text);
+    background: var(--text);
+    color: #fff;
+  }
+  .likert-scale label:hover { border-color: var(--text); color: var(--text); }
+  .likert-ends {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.75rem;
+    color: var(--muted);
+    margin-bottom: 28px;
+  }
+
+  .btn-submit {
+    padding: 13px 32px;
+    background: var(--text);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.95rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: opacity 0.15s;
+    width: 100%;
+  }
+  .btn-submit:hover { opacity: 0.82; }
+  .btn-submit:disabled { opacity: 0.35; cursor: default; }
+
+  /* ── THANK YOU ── */
+  .thanks-icon {
+    font-size: 2.5rem;
+    margin-bottom: 16px;
+  }
+  .data-pill {
+    display: inline-block;
+    background: #f0f0ec;
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 6px 16px;
+    font-size: 0.82rem;
+    color: var(--muted);
+    margin: 4px;
+  }
+  .pills { margin-top: 16px; margin-bottom: 4px; }
+
+  /* ── PROGRESS BAR ── */
+  .progress {
+    width: 100%;
+    height: 3px;
+    background: var(--border);
+    border-radius: 2px;
+    margin-bottom: 32px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    background: var(--text);
+    border-radius: 2px;
+    transition: width 0.4s ease;
+  }
+</style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════
+     SCREEN 1 — CONSENT & INSTRUCTIONS
+══════════════════════════════════════════ -->
+<div id="screen-consent" class="screen active">
+  <div class="card">
+    <h1>A/B Experiment<br>Button Color Study</h1>
+    <p style="margin-top:12px;">
+      You are invited to participate in a short usability experiment conducted by
+      <strong>Group 4</strong> for the course <em>Evaluation of Interactive Systems</em>.
+    </p>
+    <p>
+      The task takes <strong>less than 2 minutes</strong>. You will be shown a
+      webpage mockup and asked to complete a simple interaction. One anonymous
+      data point will be recorded.
+    </p>
+    <p>
+      Participation is entirely voluntary. No personal data is collected. You may
+      stop at any time. By clicking <em>Start</em> you confirm you have read this
+      information and consent to participate.
+    </p>
+    <div class="consent-meta">
+      <strong>Principal investigators:</strong> Group 4 &nbsp;·&nbsp;
+      <strong>Institution:</strong> University course project &nbsp;·&nbsp;
+      <strong>Data:</strong> Anonymous click timing only
+    </div>
+    <button class="btn-start" onclick="startExperiment()">Start the experiment →</button>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     SCREEN 2 — TASK
+══════════════════════════════════════════ -->
+<div id="screen-task" class="screen">
+  <div class="card">
+    <div class="progress"><div class="progress-fill" id="prog" style="width:33%"></div></div>
+    <div class="task-header">Task</div>
+    <h2>Find and click the sign-up button as quickly as possible.</h2>
+    <p>Below is a webpage. Your only task is to locate and click the prominent
+       action button. There is no right or wrong answer — just act naturally.</p>
+
+    <!-- Fake webpage mockup -->
+    <div class="fake-page" id="fake-page">
+      <div class="fake-page-header">
+        <div class="fake-logo"></div>
+        <span class="fake-brand">Luminary</span>
+        <div class="fake-nav">
+          <span>Features</span>
+          <span>Pricing</span>
+          <span>About</span>
+        </div>
+      </div>
+      <div class="fake-hero-label">New in 2025</div>
+      <div class="fake-hero-title">The smarter way to<br>manage your projects</div>
+      <div class="fake-hero-body">
+        Luminary brings your team, tasks, and timelines into one clean workspace.
+        Trusted by over 12,000 teams worldwide. No credit card required.
+      </div>
+      <button id="cta-btn" onclick="handleCtaClick()">Sign Up Free</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     SCREEN 3 — LIKERT
+══════════════════════════════════════════ -->
+<div id="screen-likert" class="screen">
+  <div class="card">
+    <div class="progress"><div class="progress-fill" style="width:66%"></div></div>
+    <div class="task-header">One quick question</div>
+    <div class="likert-question">
+      "How visually prominent did you find the sign-up button?"
+    </div>
+    <div class="likert-scale" id="likert-scale">
+      <input type="radio" name="likert" id="l1" value="1"><label for="l1">1</label>
+      <input type="radio" name="likert" id="l2" value="2"><label for="l2">2</label>
+      <input type="radio" name="likert" id="l3" value="3"><label for="l3">3</label>
+      <input type="radio" name="likert" id="l4" value="4"><label for="l4">4</label>
+      <input type="radio" name="likert" id="l5" value="5"><label for="l5">5</label>
+      <input type="radio" name="likert" id="l6" value="6"><label for="l6">6</label>
+      <input type="radio" name="likert" id="l7" value="7"><label for="l7">7</label>
+    </div>
+    <div class="likert-ends">
+      <span>Not at all prominent</span>
+      <span>Extremely prominent</span>
+    </div>
+    <button class="btn-submit" id="btn-submit" onclick="submitData()" disabled>Submit</button>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     SCREEN 4 — THANK YOU
+══════════════════════════════════════════ -->
+<div id="screen-thanks" class="screen">
+  <div class="card" style="text-align:center;">
+    <div class="progress"><div class="progress-fill" style="width:100%"></div></div>
+    <div class="thanks-icon">✓</div>
+    <h2>Thank you!</h2>
+    <p>Your response has been recorded. You have completed the experiment.</p>
+    <p style="margin-top:8px;">This study is part of a course project on
+    <em>Evaluation of Interactive Systems</em> at Group 4.</p>
+    <div class="pills" id="debug-pills"></div>
+    <p style="font-size:0.78rem;margin-top:8px;color:#aaa;">You may close this tab.</p>
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════════
+//  EXPERIMENT LOGIC
+// ══════════════════════════════════════════
+
+const COLORS = {
+  A: { hex: '#1a56db', name: 'Blue'  },
+  B: { hex: '#1a7a45', name: 'Green' }
+};
+
+// ── Google Forms data endpoint (replace with your form's prefilled URL)
+// To set up: create a Google Form with hidden fields for condition, time_ms, likert
+// then paste the form action URL and entry IDs below.
+const GFORM_URL    = '';   // e.g. 'https://docs.google.com/forms/d/e/XXXX/formResponse'
+const ENTRY_COND   = '';   // e.g. 'entry.123456789'
+const ENTRY_TIME   = '';   // e.g. 'entry.987654321'
+const ENTRY_LIKERT = '';   // e.g. 'entry.112233445'
+
+let condition  = null;   // 'A' or 'B'
+let startTime  = null;   // ms timestamp when task page renders
+let clickTime  = null;   // ms timestamp when CTA clicked
+let reactionMs = null;   // clickTime - startTime
+
+// ── 1. Randomise condition and show task
+function startExperiment() {
+  condition = Math.random() < 0.5 ? 'A' : 'B';
+
+  // Apply button color
+  const btn = document.getElementById('cta-btn');
+  btn.style.backgroundColor = COLORS[condition].hex;
+
+  showScreen('screen-task');
+
+  // Start timer AFTER the task screen is rendered
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => { startTime = performance.now(); });
+  });
+}
+
+// ── 2. Record click time
+function handleCtaClick() {
+  if (!startTime) return;          // guard: timer not yet set
+  clickTime  = performance.now();
+  reactionMs = Math.round(clickTime - startTime);
+
+  // visual feedback
+  const btn = document.getElementById('cta-btn');
+  btn.textContent = '✓ Clicked!';
+  btn.disabled = true;
+
+  setTimeout(() => showScreen('screen-likert'), 600);
+}
+
+// ── 3. Enable submit when Likert is chosen
+document.querySelectorAll('input[name="likert"]').forEach(r => {
+  r.addEventListener('change', () => {
+    document.getElementById('btn-submit').disabled = false;
+  });
+});
+
+// ── 4. Submit data
+function submitData() {
+  const likert = document.querySelector('input[name="likert"]:checked')?.value ?? '';
+
+  // ── Log to console (always — useful for pilot)
+  console.log({
+    condition : COLORS[condition].name,
+    time_ms   : reactionMs,
+    likert    : likert,
+    timestamp : new Date().toISOString()
+  });
+
+  // ── Send to Google Forms (if configured)
+  if (GFORM_URL) {
+    const img = new Image();           // fire-and-forget via pixel trick
+    const qs  = new URLSearchParams({
+      [ENTRY_COND]  : COLORS[condition].name,
+      [ENTRY_TIME]  : reactionMs,
+      [ENTRY_LIKERT]: likert
+    });
+    img.src = `${GFORM_URL}?${qs.toString()}`;
+  }
+
+  // ── Show debug pills on thank-you screen
+  const pills = document.getElementById('debug-pills');
+  pills.innerHTML = `
+    <span class="data-pill">Condition: ${COLORS[condition].name}</span>
+    <span class="data-pill">Reaction time: ${reactionMs} ms</span>
+    <span class="data-pill">Salience: ${likert} / 7</span>
+  `;
+
+  showScreen('screen-thanks');
+}
+
+// ── Helpers
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0,0);
+}
+</script>
+</body>
+</html>
