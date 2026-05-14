@@ -396,13 +396,10 @@ const COLORS = {
   B: { hex: '#1a7a45', name: 'Green' }
 };
 
-// ── Google Forms data endpoint (replace with your form's prefilled URL)
-// To set up: create a Google Form with hidden fields for condition, time_ms, likert
-// then paste the form action URL and entry IDs below.
-const GFORM_URL    = '';   // e.g. 'https://docs.google.com/forms/d/e/XXXX/formResponse'
-const ENTRY_COND   = '';   // e.g. 'entry.123456789'
-const ENTRY_TIME   = '';   // e.g. 'entry.987654321'
-const ENTRY_LIKERT = '';   // e.g. 'entry.112233445'
+const GFORM_URL    = 'https://docs.google.com/forms/d/e/1FAIpQLSeC04ZtzRP_4Q4JmDQmEO6bUCZRXFJK3aRQtkadzoUS5big2g/formResponse';
+const ENTRY_COND   = 'entry.1440209685';
+const ENTRY_TIME   = 'entry.456498531';
+const ENTRY_LIKERT = 'entry.217800472';
 
 let condition  = null;   // 'A' or 'B'
 let startTime  = null;   // ms timestamp when task page renders
@@ -458,16 +455,22 @@ function submitData() {
     timestamp : new Date().toISOString()
   });
 
-  // ── Send to Google Forms (if configured)
-  if (GFORM_URL) {
-    const img = new Image();           // fire-and-forget via pixel trick
-    const qs  = new URLSearchParams({
-      [ENTRY_COND]  : COLORS[condition].name,
-      [ENTRY_TIME]  : reactionMs,
-      [ENTRY_LIKERT]: likert
-    });
-    img.src = `${GFORM_URL}?${qs.toString()}`;
-  }
+  // ── Send to Google Forms
+  const body = new URLSearchParams({
+    [ENTRY_COND]  : COLORS[condition].name,
+    [ENTRY_TIME]  : reactionMs,
+    [ENTRY_LIKERT]: likert
+  });
+  fetch(GFORM_URL, {
+    method : 'POST',
+    mode   : 'no-cors',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body   : body.toString()
+  }).catch(() => {
+    // fallback if fetch is blocked
+    const img = new Image();
+    img.src = `${GFORM_URL}?${body.toString()}`;
+  });
 
   // ── Show debug pills on thank-you screen
   const pills = document.getElementById('debug-pills');
